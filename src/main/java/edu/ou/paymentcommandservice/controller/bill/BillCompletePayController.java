@@ -13,7 +13,6 @@ import edu.ou.paymentcommandservice.common.constant.Status;
 import edu.ou.paymentcommandservice.data.pojo.request.bill.BillUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +30,7 @@ public class BillCompletePayController {
      * @author Nguyen Trung Kien - OU
      */
     @PreAuthorize(SecurityPermission.PERMIT_ALL)
-    @GetMapping(
-            value = EndPoint.Bill.PAY_COMPLETE,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(EndPoint.Bill.PAY_COMPLETE)
     public ResponseEntity<IBaseResponse> completeBill(
             @PathVariable int billId,
             @RequestParam int resultCode
@@ -48,6 +43,13 @@ public class BillCompletePayController {
                 )
         );
 
+        if(resultCode!=0) {
+            return new ResponseEntity<>(
+                    failResponse,
+                    HttpStatus.OK
+            );
+        }
+
         final IBaseResponse successResponse = billUpdateService.execute(
                 new BillUpdateRequest()
                         .setBillId(billId)
@@ -55,7 +57,7 @@ public class BillCompletePayController {
         );
 
         return new ResponseEntity<>(
-                resultCode == 0 ? successResponse : failResponse,
+               successResponse,
                 HttpStatus.OK
         );
     }

@@ -44,23 +44,25 @@ public class BillUpdateService extends BaseService<IBaseRequest, IBaseResponse> 
         final BillUpdateRequest billUpdateRequest = (BillUpdateRequest) request;
         final BillEntity existBill = billFindByIdRepository.execute(billUpdateRequest.getBillId());
 
-        if (billUpdateRequest.getBillStatus().equals(Status.Bill.PAID)) {
-            existBill.setPaidDate(new Timestamp(System.currentTimeMillis()));
+        if(Status.Bill.NOT_PAID.ordinal() + 1 == existBill.getBillStatusId()){
+            if (billUpdateRequest.getBillStatus().equals(Status.Bill.PAID)) {
+                existBill.setPaidDate(new Timestamp(System.currentTimeMillis()));
+            }
+
+            existBill.setBillStatusId(billUpdateRequest.getBillStatus().ordinal() + 1);
+
+            billUpdateRepository.execute(existBill);
+
+            rabbitTemplate.convertSendAndReceive(
+                    BillUpdateQueueI.EXCHANGE,
+                    BillUpdateQueueI.ROUTING_KEY,
+                    existBill
+            );
         }
-
-        existBill.setBillStatusId(billUpdateRequest.getBillStatus().ordinal() + 1);
-
-        final int billId = billUpdateRepository.execute(existBill);
-
-        rabbitTemplate.convertSendAndReceive(
-                BillUpdateQueueI.EXCHANGE,
-                BillUpdateQueueI.ROUTING_KEY,
-                existBill
-        );
 
         return new SuccessResponse<>(
                 new SuccessPojo<>(
-                        billId,
+                        billUpdateRequest.getBillId(),
                         CodeStatus.SUCCESS,
                         Message.Success.SUCCESSFUL
                 )
