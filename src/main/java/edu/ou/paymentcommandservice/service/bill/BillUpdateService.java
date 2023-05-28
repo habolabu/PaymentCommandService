@@ -44,7 +44,7 @@ public class BillUpdateService extends BaseService<IBaseRequest, IBaseResponse> 
         final BillUpdateRequest billUpdateRequest = (BillUpdateRequest) request;
         final BillEntity existBill = billFindByIdRepository.execute(billUpdateRequest.getBillId());
 
-        if (Status.Bill.CREATED.ordinal() + 1 != existBill.getBillStatusId()) {
+        if (Status.Bill.CREATED != billUpdateRequest.getBillStatus()) {
             if (billUpdateRequest.getBillStatus().equals(Status.Bill.PAID)) {
                 existBill.setPaidDate(new Timestamp(System.currentTimeMillis()));
             }
