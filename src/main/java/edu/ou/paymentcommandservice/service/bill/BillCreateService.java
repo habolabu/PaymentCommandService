@@ -73,11 +73,17 @@ public class BillCreateService {
         final List<RoomPaymentResponse> roomPaymentResponses = new ArrayList<>();
         final List<ParkingPaymentResponse> parkingPaymentResponses = new ArrayList<>();
 
-        assert roomPaymentMaps != null;
+        if (Objects.isNull(roomPaymentMaps)){
+            return;
+        }
+
         roomPaymentMaps.forEach(roomPaymentMap -> roomPaymentResponses.add(RoomPaymentMapper.INSTANCE
                 .fromMap(roomPaymentMap)));
 
-        assert parkingPaymentMaps != null;
+        if (Objects.isNull(parkingPaymentMaps)){
+            return;
+        }
+
         parkingPaymentMaps.forEach(parkingPaymentMap -> parkingPaymentResponses.add(ParkingPaymentMapper.INSTANCE
                 .fromMap(parkingPaymentMap)));
 
